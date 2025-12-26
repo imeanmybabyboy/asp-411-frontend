@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import "./ui/Shop.css";
+import { Link } from "react-router-dom";
 
 export default function Shop() {
     const [model, setModel] = useState<ShopIndexViewModel>({ groups: [] });
@@ -24,8 +25,8 @@ export default function Shop() {
 
 function GroupCard({ group }: { group: Group }) {
     return (
-        <div className="col">
-            <a className="nav-link text-dark h-100" href="#!">
+        <Link to={"/group/" + group.name}>
+            <a className="text-dark h-100" href="#!">
                 <div className="card h-100">
                     <img
                         src={group.imageUrl}
@@ -38,7 +39,7 @@ function GroupCard({ group }: { group: Group }) {
                     </div>
                 </div>
             </a>
-        </div>
+        </Link>
     );
 }
 

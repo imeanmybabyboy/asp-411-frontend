@@ -1,12 +1,112 @@
 import { Link, Outlet } from "react-router-dom";
 import "./ui/Layout.css";
+import AppContext from "../context/AppContext";
+import { useContext, useRef } from "react";
+import Base64 from "../../shared/base64/Base64";
 
 export default function Layout() {
+    const { user, setUser } = useContext(AppContext)!;
+    const closeModalRef = useRef<HTMLButtonElement>(null);
+
     const authSubmit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
 
         let data = new FormData(e.target as HTMLFormElement);
         console.log(data.get("user-login"), data.get("user-password"));
+
+        const formData = new FormData(e.target as HTMLFormElement);
+
+        const login = formData.get("user-login");
+        const password = formData.get("user-password");
+        // let invalid = login.length === 0;
+        // const loginCont = form.querySelector("div:nth-child(1)");
+
+        // if (invalid) {
+        //     let loginInvalid = loginCont.querySelector(".invalid-feedback");
+
+        //     if (!loginInvalid) {
+        //         loginInvalid = document.createElement("div");
+        //         loginInvalid.textContent = "Необхідно зазначити логін!";
+        //         loginInvalid.classList.add("invalid-feedback");
+
+        //         loginCont.append(loginInvalid);
+        //     }
+        //     loginCont.querySelector("input").classList.add("is-invalid");
+        //     loginCont.querySelector("input").classList.remove("is-valid");
+        //     return;
+        // } else {
+        //     loginCont.querySelector("input").classList.remove("is-invalid");
+        //     loginCont.querySelector("input").classList.add("is-valid");
+        // }
+
+        // invalid = password.length === 0;
+        // const passwordCont = form.querySelector("div:nth-child(2)");
+
+        // if (invalid) {
+        //     let passwordInvalid =
+        //         passwordCont.querySelector(".invalid-feedback");
+
+        //     if (!passwordInvalid) {
+        //         passwordInvalid = document.createElement("div");
+        //         passwordInvalid.textContent = "Необхідно зазначити пароль!";
+        //         passwordInvalid.classList.add("invalid-feedback");
+
+        //         passwordCont.append(passwordInvalid);
+        //     }
+        //     passwordCont.querySelector("input").classList.add("is-invalid");
+        //     passwordCont.querySelector("input").classList.remove("is-valid");
+        //     return;
+        // } else {
+        //     passwordCont.querySelector("input").classList.remove("is-invalid");
+        //     passwordCont.querySelector("input").classList.add("is-valid");
+        // }
+
+        // RFC 7617
+        // https://datatracker.ietf.org/doc/html/rfc7617
+
+        const userPass = login + ":" + password;
+        const basicCredentials = Base64.encode(userPass);
+
+        fetch("https://localhost:7012/User/ApiAuthenticate", {
+            method: "GET",
+            headers: {
+                Authorization: "Basic " + basicCredentials,
+            },
+        }).then((r) => {
+            if (r.status >= 400) {
+                r.text().then((t) => {
+                    console.log(t);
+
+                    // let modalFooter =
+                    //     document.querySelector(".modal-footer");
+                    // let errorCont =
+                    //     modalFooter.querySelector(".alert-danger");
+
+                    // if (error === "") {
+                    //     errorCont.remove();
+                    // } else {
+                    //     if (errorCont) {
+                    //         errorCont.remove();
+                    //     }
+
+                    //     errorCont = document.createElement("div");
+                    //     errorCont.classList.add("alert");
+                    //     errorCont.classList.add("alert-danger");
+                    //     errorCont.classList.add("text-truncate");
+                    //     errorCont.style.width = "fit-content";
+                    //     errorCont.style.maxWidth = "250px";
+                    //     errorCont.style.padding = "6px";
+                    //     errorCont.title = error;
+                    //     errorCont.textContent = error;
+
+                    //     modalFooter.prepend(errorCont);
+                    // }
+                });
+            } else {
+                r.json().then((j) => setUser(j));
+                closeModalRef.current?.click();
+            }
+        });
     };
 
     return (
@@ -17,6 +117,7 @@ export default function Layout() {
                         <Link className="navbar-brand" to="/">
                             ASP_PV411
                         </Link>
+                        <Link to="/Profile">Мій профіль</Link>
                         <button
                             className="navbar-toggler"
                             type="button"
@@ -92,68 +193,33 @@ export default function Layout() {
                                     </Link>
                                 </li>
                             </ul>
-
-                            {/* @if (isAuthenticated)
-                            {
-                                if (roleId == "Admin")
-                                {
-                                    <a className="nav-link p-2"
-                                    title="Admin panel"
-                                    asp-controller="Admin"
-                                    asp-action="Index">
-                                        <i className="bi bi-speedometer2"></i>
-                                    </a>
-                                }
-
-                                <a className="nav-link p-2"
-                                title="Мій кошик"
-                                asp-controller="Cart"
-                                asp-action="Index">
-                                    <i className="bi bi-cart"></i>
-                                </a>
-
-                                <div className="nav-item">
-                                    <a className="nav-link text-dark" title="Private info" asp-area="" asp-controller="User" asp-action="Private">
-                                        Private page
-                                    </a>
-                                </div>
-
-                                <div className="d-flex gap-2 align-items-center">
-                                    <a asp-controller="User" asp-action="Profile" className="border border-2 border-warning rounded-circle d-flex align-items-center justify-content-center nav-link"
-                                    title="@userTitle"
-                                    style="width: 35px; height: 35px">
-                                        @(userLetter!.ToUpper())
-                                    </a>
-
-                                    <a href="?logout"
-                                    className="btn btn-outline-secondary"
-                                    title="Вихід з авторизованого режиму">
-                                        <i className="bi bi-box-arrow-left"></i>
-                                    </a>
-                                </div>
-                            }
-                            else
-                            {
-                                @* Button trigger modal *@
-                                <a asp-controller="User" asp-action="SignUp" className="btn btn-outline-secondary me-3">
-                                    <i className="bi bi-person-plus"></i>
-                                </a>
-
-                                @* Button trigger modal *@
-                                <button type="button" className="btn btn-outline-secondary"
+                            {user === null ? (
+                                <>
+                                    <button
+                                        type="button"
+                                        className="btn btn-outline-secondary"
                                         data-bs-toggle="modal"
-                                        data-bs-target="#authModal">
-                                    <i className="bi bi-box-arrow-in-right"></i>
-                                </button>
-                            } */}
-                            <button
-                                type="button"
-                                className="btn btn-outline-secondary"
-                                data-bs-toggle="modal"
-                                data-bs-target="#authModal"
-                            >
-                                <i className="bi bi-box-arrow-in-right"></i>
-                            </button>
+                                        data-bs-target="#authModal"
+                                    >
+                                        <i className="bi bi-box-arrow-in-right"></i>
+                                    </button>
+                                </>
+                            ) : (
+                                <div className="d-flex align-items-center gap-2">
+                                    <Link to="/Profile">
+                                        <button className="btn btn-outline-success">
+                                            {user.name.charAt(0)}
+                                        </button>
+                                    </Link>
+
+                                    <button
+                                        onClick={() => setUser(null)}
+                                        className="btn btn-outline-success"
+                                    >
+                                        <i className="bi bi-box-arrow-in-left"></i>
+                                    </button>
+                                </div>
+                            )}
                         </div>
                     </div>
                 </nav>
@@ -190,6 +256,7 @@ export default function Layout() {
                                 className="btn-close"
                                 data-bs-dismiss="modal"
                                 aria-label="Close"
+                                ref={closeModalRef}
                             ></button>
                         </div>
                         <div className="modal-body">

@@ -10,23 +10,37 @@ import Controllers from "../../pages/controllers/Controllers";
 import Db from "../../pages/db/Db";
 import Middleware from "../../pages/middleware/Middleware";
 import Storage from "../../pages/storage/Storage";
+import AppContext from "../../features/context/AppContext";
+import { useState } from "react";
+import type IUser from "../../entities/user/model/IUser";
+import Profile from "../../pages/profile/Profile";
+import Group from "../../pages/group/Group";
+import NotFound from "../../pages/not_found/NotFound";
 
 export default function App() {
+    const [user, setUser] = useState<IUser | null>(null);
+
     return (
-        <BrowserRouter>
-            <Routes>
-                <Route path="/" element={<Layout />}>
-                    <Route index element={<Home />} />
-                    <Route path="/Intro" element={<Intro />} />
-                    <Route path="/Privacy" element={<Privacy />} />
-                    <Route path="/History" element={<History />} />
-                    <Route path="/Controllers" element={<Controllers />} />
-                    <Route path="/Db" element={<Db />} />
-                    <Route path="/Middleware" element={<Middleware />} />
-                    <Route path="/Storage" element={<Storage />} />
-                    <Route path="/Shop" element={<Shop />} />
-                </Route>
-            </Routes>
-        </BrowserRouter>
+        <AppContext.Provider value={{ user, setUser }}>
+            <BrowserRouter>
+                <Routes>
+                    <Route path="/" element={<Layout />}>
+                        <Route index element={<Home />} />
+                        <Route path="Intro" element={<Intro />} />
+                        <Route path="Privacy" element={<Privacy />} />
+                        <Route path="History" element={<History />} />
+                        <Route path="Controllers" element={<Controllers />} />
+                        <Route path="Db" element={<Db />} />
+                        <Route path="Middleware" element={<Middleware />} />
+                        <Route path="Storage" element={<Storage />} />
+                        <Route path="Shop" element={<Shop />} />
+                        <Route path="Profile" element={<Profile />} />
+                        <Route path="Group/:slug" element={<Group />} />
+                        
+                        <Route path="*" element={<NotFound />} />
+                    </Route>
+                </Routes>
+            </BrowserRouter>
+        </AppContext.Provider>
     );
 }
