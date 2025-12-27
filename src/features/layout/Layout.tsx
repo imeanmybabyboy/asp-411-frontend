@@ -18,48 +18,78 @@ export default function Layout() {
 
         const login = formData.get("user-login");
         const password = formData.get("user-password");
-        // let invalid = login.length === 0;
-        // const loginCont = form.querySelector("div:nth-child(1)");
 
-        // if (invalid) {
-        //     let loginInvalid = loginCont.querySelector(".invalid-feedback");
+        if (login !== null && password !== null) {
+            let invalid = login.toString().length === 0;
 
-        //     if (!loginInvalid) {
-        //         loginInvalid = document.createElement("div");
-        //         loginInvalid.textContent = "Необхідно зазначити логін!";
-        //         loginInvalid.classList.add("invalid-feedback");
+            const loginCont = (e.target as HTMLElement).querySelector(
+                "div:nth-child(1)"
+            );
 
-        //         loginCont.append(loginInvalid);
-        //     }
-        //     loginCont.querySelector("input").classList.add("is-invalid");
-        //     loginCont.querySelector("input").classList.remove("is-valid");
-        //     return;
-        // } else {
-        //     loginCont.querySelector("input").classList.remove("is-invalid");
-        //     loginCont.querySelector("input").classList.add("is-valid");
-        // }
+            if (loginCont !== null) {
+                if (invalid) {
+                    let loginInvalid =
+                        loginCont.querySelector(".invalid-feedback");
 
-        // invalid = password.length === 0;
-        // const passwordCont = form.querySelector("div:nth-child(2)");
+                    if (!loginInvalid) {
+                        loginInvalid = document.createElement("div");
+                        loginInvalid.textContent = "Необхідно зазначити логін!";
+                        loginInvalid.classList.add("invalid-feedback");
 
-        // if (invalid) {
-        //     let passwordInvalid =
-        //         passwordCont.querySelector(".invalid-feedback");
+                        loginCont.append(loginInvalid);
+                    }
+                    let input = loginCont.querySelector("input");
 
-        //     if (!passwordInvalid) {
-        //         passwordInvalid = document.createElement("div");
-        //         passwordInvalid.textContent = "Необхідно зазначити пароль!";
-        //         passwordInvalid.classList.add("invalid-feedback");
+                    if (input !== null) {
+                        input.classList.add("is-invalid");
+                        input.classList.remove("is-valid");
+                    }
+                    return;
+                } else {
+                    let input = loginCont.querySelector("input");
 
-        //         passwordCont.append(passwordInvalid);
-        //     }
-        //     passwordCont.querySelector("input").classList.add("is-invalid");
-        //     passwordCont.querySelector("input").classList.remove("is-valid");
-        //     return;
-        // } else {
-        //     passwordCont.querySelector("input").classList.remove("is-invalid");
-        //     passwordCont.querySelector("input").classList.add("is-valid");
-        // }
+                    if (input !== null) {
+                        input.classList.add("is-valid");
+                        input.classList.remove("is-invalid");
+                    }
+                }
+            }
+
+            invalid = password.toString().length === 0;
+            const passwordCont = (e.target as HTMLElement).querySelector(
+                "div:nth-child(2)"
+            );
+
+            if (passwordCont !== null) {
+                if (invalid) {
+                    let passwordInvalid =
+                        passwordCont.querySelector(".invalid-feedback");
+
+                    if (!passwordInvalid) {
+                        passwordInvalid = document.createElement("div");
+                        passwordInvalid.textContent =
+                            "Необхідно зазначити пароль!";
+                        passwordInvalid.classList.add("invalid-feedback");
+
+                        passwordCont.append(passwordInvalid);
+                    }
+                    let input = passwordCont.querySelector("input");
+
+                    if (input !== null) {
+                        input.classList.add("is-invalid");
+                        input.classList.remove("is-valid");
+                    }
+                    return;
+                } else {
+                    let input = passwordCont.querySelector("input");
+
+                    if (input !== null) {
+                        input.classList.add("is-valid");
+                        input.classList.remove("is-invalid");
+                    }
+                }
+            }
+        }
 
         // RFC 7617
         // https://datatracker.ietf.org/doc/html/rfc7617
@@ -74,33 +104,27 @@ export default function Layout() {
             },
         }).then((r) => {
             if (r.status >= 400) {
-                r.text().then((t) => {
-                    console.log(t);
+                r.text().then((error) => {
+                    let modalFooter = document.querySelector(".modal-footer");
+                    if (!modalFooter) return;
 
-                    // let modalFooter =
-                    //     document.querySelector(".modal-footer");
-                    // let errorCont =
-                    //     modalFooter.querySelector(".alert-danger");
+                    let errorCont = modalFooter.querySelector(".alert-danger");
 
-                    // if (error === "") {
-                    //     errorCont.remove();
-                    // } else {
-                    //     if (errorCont) {
-                    //         errorCont.remove();
-                    //     }
+                    if (error === "") {
+                        errorCont?.remove();
+                        return;
+                    }
+                    errorCont?.remove();
 
-                    //     errorCont = document.createElement("div");
-                    //     errorCont.classList.add("alert");
-                    //     errorCont.classList.add("alert-danger");
-                    //     errorCont.classList.add("text-truncate");
-                    //     errorCont.style.width = "fit-content";
-                    //     errorCont.style.maxWidth = "250px";
-                    //     errorCont.style.padding = "6px";
-                    //     errorCont.title = error;
-                    //     errorCont.textContent = error;
+                    const newErrorCont = document.createElement("div");
+                    newErrorCont.classList.add("alert", "alert-danger", "text-truncate")
+                    newErrorCont.style.width = "fit-content";
+                    newErrorCont.style.maxWidth = "250px";
+                    newErrorCont.style.padding = "6px";
+                    newErrorCont.title = error;
+                    newErrorCont.textContent = error;
 
-                    //     modalFooter.prepend(errorCont);
-                    // }
+                    modalFooter.prepend(newErrorCont);
                 });
             } else {
                 r.json().then((j) => setUser(j));
@@ -229,7 +253,7 @@ export default function Layout() {
                 <Outlet />
             </main>
 
-            <footer className="border-top footer text-muted">
+            <footer className="border-top footer text-muted mt-4">
                 <div className="container">
                     &copy; 2025 - ASP_PV411 - <Link to="Privacy">Privacy</Link>
                 </div>
@@ -275,7 +299,6 @@ export default function Layout() {
                                         placeholder="Login"
                                         aria-label="Login"
                                         aria-describedby="login-addon"
-                                        value="Admin"
                                     />
                                 </div>
                                 <div className="input-group mb-3">
@@ -292,7 +315,6 @@ export default function Layout() {
                                         placeholder="Password"
                                         aria-label="Password"
                                         aria-describedby="user-password-addon"
-                                        value="Admin"
                                     />
                                 </div>
                             </form>
