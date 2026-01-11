@@ -7,6 +7,7 @@ import Base64 from "../../shared/base64/Base64";
 export default function Layout() {
     const { user, setUser } = useContext(AppContext)!;
     const closeModalRef = useRef<HTMLButtonElement>(null);
+    const { request } = useContext(AppContext)!;
 
     const authSubmit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
@@ -97,14 +98,18 @@ export default function Layout() {
         const userPass = login + ":" + password;
         const basicCredentials = Base64.encode(userPass);
 
-        fetch("https://localhost:7012/User/ApiAuthenticate", {
-            method: "GET",
-            headers: {
-                Authorization: "Basic " + basicCredentials,
+        request(
+            "api://User/ApiAuthenticate",
+            {
+                method: "GET",
+                headers: {
+                    Authorization: "Basic " + basicCredentials,
+                },
             },
-        }).then((r) => {
-            if (r.status >= 400) {
-                r.text().then((error) => {
+            true
+        ).then((j) => {
+            if (j.status >= 400) {
+                j.text().then((error: string) => {
                     let modalFooter = document.querySelector(".modal-footer");
                     if (!modalFooter) return;
 
@@ -117,7 +122,11 @@ export default function Layout() {
                     errorCont?.remove();
 
                     const newErrorCont = document.createElement("div");
-                    newErrorCont.classList.add("alert", "alert-danger", "text-truncate")
+                    newErrorCont.classList.add(
+                        "alert",
+                        "alert-danger",
+                        "text-truncate"
+                    );
                     newErrorCont.style.width = "fit-content";
                     newErrorCont.style.maxWidth = "250px";
                     newErrorCont.style.padding = "6px";
@@ -127,7 +136,7 @@ export default function Layout() {
                     modalFooter.prepend(newErrorCont);
                 });
             } else {
-                r.json().then((j) => setUser(j));
+                setUser(j);
                 closeModalRef.current?.click();
             }
         });
@@ -141,7 +150,6 @@ export default function Layout() {
                         <Link className="navbar-brand" to="/">
                             ASP_PV411
                         </Link>
-                        <Link to="/Profile">Мій профіль</Link>
                         <button
                             className="navbar-toggler"
                             type="button"
@@ -162,58 +170,10 @@ export default function Layout() {
                                 </li>
                                 <li className="nav-item">
                                     <Link
-                                        className="nav-link text-dark"
-                                        to="/Intro"
-                                    >
-                                        Intro
-                                    </Link>
-                                </li>
-                                <li className="nav-item">
-                                    <Link
-                                        className="nav-link text-dark"
-                                        to="/History"
-                                    >
-                                        History
-                                    </Link>
-                                </li>
-                                <li className="nav-item">
-                                    <Link
                                         className="nav-item nav-link text-dark"
                                         to="/Privacy"
                                     >
                                         Privacy
-                                    </Link>
-                                </li>
-                                <li className="nav-item">
-                                    <Link
-                                        className="nav-item nav-link text-dark"
-                                        to="/Controllers"
-                                    >
-                                        <i className="bi bi-sign-intersection-y"></i>
-                                    </Link>
-                                </li>
-                                <li className="nav-item">
-                                    <Link
-                                        className="nav-item nav-link text-dark"
-                                        to="/Db"
-                                    >
-                                        <i className="bi bi-database"></i>
-                                    </Link>
-                                </li>
-                                <li className="nav-item">
-                                    <Link
-                                        className="nav-item nav-link text-dark"
-                                        to="/Middleware"
-                                    >
-                                        <i className="bi bi-arrow-bar-right"></i>
-                                    </Link>
-                                </li>
-                                <li className="nav-item">
-                                    <Link
-                                        className="nav-item nav-link text-dark"
-                                        to="/Storage"
-                                    >
-                                        <i className="bi bi-file-earmark-arrow-up"></i>
                                     </Link>
                                 </li>
                             </ul>
@@ -299,6 +259,7 @@ export default function Layout() {
                                         placeholder="Login"
                                         aria-label="Login"
                                         aria-describedby="login-addon"
+                                        defaultValue={"Admin"}
                                     />
                                 </div>
                                 <div className="input-group mb-3">
@@ -315,6 +276,7 @@ export default function Layout() {
                                         placeholder="Password"
                                         aria-label="Password"
                                         aria-describedby="user-password-addon"
+                                        defaultValue={"Admin"}
                                     />
                                 </div>
                             </form>
